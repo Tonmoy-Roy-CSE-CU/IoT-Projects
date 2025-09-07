@@ -1,0 +1,22 @@
+//Arduino UNO= 1100
+*node MCU= 450
+*Servo motor= 200
+*Motor driver= 250
+*relay module
+*Mini DC Submersible Pump= 150
+*Flame Sensor= 50*3 =150
+Robot chassis with motors (4) and wheels(4) =550 or 1200
+*jumping wire= 200
+*Bread board=150
+*battery=600
+*battery holder
+//Bluetooth module=350
+*Buzzer=30
+*red led=2
+*green led=2
+*blue led=2
+*charger modiul=80
+//Glue gun=300
+*Switch(on/off)=
+*resistor
+

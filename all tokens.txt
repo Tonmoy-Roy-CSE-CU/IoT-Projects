@@ -1,0 +1,21 @@
+
+নিশাচর ২.০
+Nishachor#2025
+
+#define BLYNK_TEMPLATE_ID "TMPL6d3i8TSMg"
+#define BLYNK_TEMPLATE_NAME "agri bot"
+#define BLYNK_AUTH_TOKEN "t5E0Je5OQ95XFkpEPzqXbfxT_KoUuc6p"
+
+
+
+#define BLYNK_TEMPLATE_ID "TMPL68lkKjnGl"
+#define BLYNK_TEMPLATE_NAME "Led on off"
+#define BLYNK_AUTH_TOKEN "K-DBSCT5ZrXPU3d9Nlr85i6dSBU_V8cR"
+
+
+
+#define BLYNK_TEMPLATE_ID "TMPL6aG_9BmYK"
+#define BLYNK_TEMPLATE_NAME "Fire Fighter Robo m1"
+#define BLYNK_AUTH_TOKEN "X6LR7zHDQ6Qf1IC49_19UiugkeuaWyLH"
+
+ESP32-S3 WROOM-1 N16R8 

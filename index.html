@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Projects Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+        .section-title {
+            @apply text-2xl font-bold text-gray-800 mb-4;
+        }
+        .content-text {
+            @apply text-gray-600 mb-4;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-semibold">IoT Projects Portfolio</h1>
+            <div class="space-x-4">
+                <a href="#overview" class="hover:underline">Overview</a>
+                <a href="#projects" class="hover:underline">Projects</a>
+                <a href="#contact" class="hover:underline">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6">
+        <!-- Overview -->
+        <section id="overview" class="mb-8">
+            <h2 class="section-title">Welcome to My IoT Projects</h2>
+            <p class="content-text">
+                This repository showcases my work in Internet of Things (IoT) and embedded systems, focusing on innovative hardware and software solutions. Each project demonstrates practical applications of microcontrollers, sensors, and real-time control, built with a passion for robotics and automation. Explore the projects below, starting with my Autonomous Obstacle Avoidance Robot, with more exciting projects to be added soon!
+            </p>
+        </section>
+
+        <!-- Projects -->
+        <section id="projects" class="mb-8">
+            <h2 class="section-title">Projects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Autonomous Robot Project -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Autonomous Obstacle Avoidance Robot</h3>
+                    <p class="content-text">
+                        A 27 cm × 25 cm robot powered by the ESP8266 NodeMCU, using four DC motors (paired as left/right) for navigation. It features an HC-SR04 ultrasonic sensor on an SG90 servo for 140° scanning (20°/160°), enabling precise obstacle avoidance with 90° turns and ~7–10 cm reverse maneuvers. Includes a custom circuit diagram and demo video.
+                    </p>
+                    <a href="Autonomous Obstacle Avoidace Robot/index.html" class="text-blue-600 hover:underline">View Project Details</a>
+                </div>
+                <!-- Placeholder for Future Project -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Future Project</h3>
+                    <p class="content-text">
+                        Stay tuned for more IoT projects! Upcoming work will explore advanced sensors, wireless communication, or smart home applications, leveraging platforms like ESP8266, Arduino, or Raspberry Pi.
+                    </p>
+                    <a href="#" class="text-blue-600 hover:underline opacity-50 cursor-not-allowed">Coming Soon</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact -->
+        <section id="contact" class="mb-8">
+            <h2 class="section-title">Contact</h2>
+            <p class="content-text">
+                Interested in my work or have ideas for collaboration? Connect with me on <a href="https://www.linkedin.com/in/your-linkedin-profile" class="text-blue-600 hover:underline">LinkedIn</a> or check out the source code and project details on <a href="https://github.com/your-username/IoT-Projects" class="text-blue-600 hover:underline">GitHub</a>.
+            </p>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>Created by Tonmoy Roy | <a href="https://github.com/your-username/IoT-Projects" class="underline">GitHub Repository</a> | 2025</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomous Obstacle Avoidance Robot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+        }
+        .section-title {
+            @apply text-2xl font-bold text-gray-800 mb-4;
+        }
+        .content-text {
+            @apply text-gray-600 mb-4;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation Bar -->
+    <nav class="bg-blue-600 text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-semibold">Autonomous Robot Project</h1>
+            <div class="space-x-4">
+                <a href="#overview" class="hover:underline">Overview</a>
+                <a href="#page" class="hover:underline">PAGE Description</a>
+                <a href="#hardware" class="hover:underline">Hardware</a>
+                <a href="#software" class="hover:underline">Software</a>
+                <a href="#media" class="hover:underline">Media</a>
+                <a href="#testing" class="hover:underline">Testing</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6">
+        <!-- Overview -->
+        <section id="overview" class="mb-8">
+            <h2 class="section-title">Project Overview</h2>
+            <p class="content-text">
+                This project presents an <strong>Autonomous Obstacle Avoidance Robot</strong> built with the ESP8266 NodeMCU, designed for a 27 cm × 25 cm chassis. Powered by four DC motors, the robot navigates indoor environments, avoiding obstacles using an HC-SR04 ultrasonic sensor mounted on an SG90 servo. The system features precise 90-degree turns, ~7–10 cm reverse maneuvers, and a robust C++ algorithm for real-time path planning. A custom circuit diagram and demo video showcase the robot’s flawless performance.
+            </p>
+        </section>
+
+        <!-- PAGE Description -->
+        <section id="page" class="mb-8">
+            <h2 class="section-title">PAGE Description</h2>
+            <ul class="list-disc pl-6 content-text">
+                <li><strong>Perception</strong>: The HC-SR04 sensor, mounted on an SG90 servo, scans at 20° (right), 160° (left), and 90° (center), measuring distances up to 200 cm. It detects obstacles within 20–45 cm for path planning.</li>
+                <li><strong>Action</strong>: Four DC motors (paired as left and right sides) enable forward movement (PWM speed 120), 90° turns (speed 140), and reverse maneuvers (speed 90). Emergency actions (speed 90) handle obstacles <20 cm, with a 180° turn after five stuck situations.</li>
+                <li><strong>Goal</strong>: Achieve seamless autonomous navigation in confined spaces (≥65 cm wide), ensuring precise obstacle avoidance for a compact robot.</li>
+                <li><strong>Environment</strong>: Indoor settings like corridors or rooms with flat surfaces, navigating around obstacles (e.g., walls, objects).</li>
+            </ul>
+        </section>
+
+        <!-- Hardware -->
+        <section id="hardware" class="mb-8">
+            <h2 class="section-title">Hardware</h2>
+            <p class="content-text">The robot uses the following components:</p>
+            <ul class="list-disc pl-6 content-text">
+                <li><strong>Microcontroller</strong>: ESP8266 NodeMCU (12E, 3.3V logic, 5V-tolerant GPIOs).</li>
+                <li><strong>Ultrasonic Sensor</strong>: HC-SR04 (5V, distance measurement).</li>
+                <li><strong>Servo Motor</strong>: SG90 (5V, pans sensor).</li>
+                <li><strong>Motor Drivers</strong>: Two L298N modules (control four 6V DC motors, paired as left and right sides).</li>
+                <li><strong>DC Motors</strong>: Four 6V DC motors with wheels (left-front/left-rear, right-front/right-rear).</li>
+                <li><strong>Power</strong>: 6–7.4V battery for motors, 5V regulator for NodeMCU and servo.</li>
+                <li><strong>Miscellaneous</strong>: Jumper wires, 10kΩ resistors (pull-down on D8, pull-up on D4 if needed).</li>
+            </ul>
+        </section>
+
+        <!-- Software -->
+        <section id="software" class="mb-8">
+            <h2 class="section-title">Software</h2>
+            <p class="content-text">
+                The robot is programmed in C++ using the Arduino IDE with the Servo library. Key parameters:
+            </p>
+            <ul class="list-disc pl-6 content-text">
+                <li><strong>Scan Angles</strong>: 20° (right), 160° (left), 90° (center).</li>
+                <li><strong>Speeds</strong>: Forward: 120, Turns: 140, Reverse: 90, Emergency: 90 (PWM, 0–1023).</li>
+                <li><strong>Timing</strong>: 800 ms for 90° turns, 500 ms for reverse, 250 ms servo scan delay.</li>
+                <li><strong>Algorithm</strong>: Scans environment, moves forward if clear (>35 cm), turns if obstacles detected (20–45 cm), or reverses in emergencies (<20 cm).</li>
+            </ul>
+            <p class="content-text">
+                Full code available in the <a href="https://github.com/your-username/your-repo/blob/main/ObstacleAvoidanceRobot.ino" class="text-blue-600 hover:underline">GitHub repository</a>.
+            </p>
+        </section>
+
+        <!-- Media -->
+        <section id="media" class="mb-8">
+            <h2 class="section-title">Media</h2>
+            <p class="content-text">View the circuit diagram and demo video below:</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Circuit Diagram</h3>
+                    <img src="circuit_diagram.jpg" alt="Circuit Diagram" class="w-full rounded-lg shadow-md">
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Demo Video</h3>
+                    <video controls class="w-full rounded-lg shadow-md">
+                        <source src="demo_video.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testing -->
+        <section id="testing" class="mb-8">
+            <h2 class="section-title">Testing</h2>
+            <p class="content-text">To verify performance:</p>
+            <ol class="list-decimal pl-6 content-text">
+                <li><strong>Wiring</strong>: Confirm connections match the circuit diagram. Add 10kΩ pull-down on D8 (ECHO) and pull-up on D4 (IN4) if boot issues occur.</li>
+                <li><strong>Initialization</strong>: Open Serial Monitor (9600 baud) to verify servo (20°/160°/90°) and motor tests (forward, backward, left, right).</li>
+                <li><strong>Navigation</strong>: Test with obstacles at 20 cm (emergency reverse), 20–35 cm (scan and turn), >35 cm (forward). Confirm 90° turns (800 ms).</li>
+                <li><strong>Environment</strong>: Test in a ≥65 cm corridor to ensure obstacle avoidance.</li>
+            </ol>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white p-4 text-center">
+        <p>Created by Tonmoy Roy | <a href="https://github.com/your-username/your-repo" class="underline">GitHub Repository</a> | 2025</p>
+    </footer>
+</body>
+</html>

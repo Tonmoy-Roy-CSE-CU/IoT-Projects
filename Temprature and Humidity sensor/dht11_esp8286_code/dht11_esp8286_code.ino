@@ -1,43 +1,46 @@
-/*
- * DHT sensor libarary by adafruit
- * website: https://esp32io.com/tutorials/esp32-dht22
- */
-
 #include <DHT.h>
-#define DHT11_PIN  13 // ESP32 pin GPIO13 connected to DHT11 sensor
 
-DHT dht11(DHT11_PIN, DHT11);
+#define DHTPIN 13       // ESP32 pin connected to DHT sensor data
+#define DHTTYPE DHT11   // Change to DHT11 if using DHT11
+
+#define LEDPIN 5        // GPIO5 connected to LED
+
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
   Serial.begin(9600);
-  dht11.begin(); // initialize the DHT11 sensor
+  dht.begin();           // Initialize DHT sensor
+  pinMode(LEDPIN, OUTPUT); // Initialize LED pin
 }
 
 void loop() {
-  // read humidity
-  float humi  = dht11.readHumidity();
-  // read temperature in Celsius
-  float tempC = dht11.readTemperature();
-  // read temperature in Fahrenheit
-  float tempF = dht11.readTemperature(true);
+  delay(2000); // Wait between readings
 
-  // check whether the reading is successful or not
-  if ( isnan(tempC) || isnan(tempF) || isnan(humi)) {
-    Serial.println("Failed to read from DHT11 sensor!");
-  } else {
-    Serial.print("Humidity: ");
-    Serial.print(humi);
-    Serial.print("%");
+  float humidity = dht.readHumidity();
+  float temperatureC = dht.readTemperature();
+  float temperatureF = dht.readTemperature(true);
 
-    Serial.print("  |  ");
-
-    Serial.print("Temperature: ");
-    Serial.print(tempC);
-    Serial.print("°C  ~  ");
-    Serial.print(tempF);
-    Serial.println("°F");
+  if (isnan(humidity) || isnan(temperatureC) || isnan(temperatureF)) {
+    Serial.println("❌ Failed to read from DHT sensor!");
+    return;
   }
 
-  // wait a 2 seconds between readings
-  delay(2000);
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.print(" °C  ~  ");
+  Serial.print(temperatureF);
+  Serial.println(" °F");
+
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.println(" %");
+
+  // Condition to control LED
+  if (temperatureC > 25) {
+    digitalWrite(LEDPIN, LOW); // Turn LED on
+    Serial.println("💡 LED ON - Temperature above 25°C");
+  } else {
+    digitalWrite(LEDPIN, LOW);  // Turn LED off
+    Serial.println("💡 LED OFF - Temperature below 25°C");
+  }
 }

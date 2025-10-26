@@ -36,7 +36,7 @@ const int serverPort = 80;
 #define TEMP_THRESHOLD 25.0     // Temperature threshold for irrigation (°C)
 #define HTTP_TIMEOUT 10000     // HTTP request timeout (ms)
 #define DATA_COLLECTION_WAIT 3000 // Wait for data collection only (ms)
-#define IRRIGATION_WAIT 10000   // Wait for irrigation process (5s pump + 3s servo + buffer) (ms)
+#define IRRIGATION_WAIT 10000   // Wait for irrigation process (ms)
 
 Servo sensorServo;
 float distance;
@@ -48,6 +48,8 @@ bool emergencyMode = false;
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("\n=== AutoAgriBot Unit 1 (Car) ===");
+  
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
   pinMode(ENA, OUTPUT);
@@ -57,18 +59,38 @@ void setup() {
   pinMode(IN4, OUTPUT);
   pinMode(ENB, OUTPUT);
 
+  // CRITICAL: Stop motors before servo initialization
+  carStop();
+  delay(500);
+
+  // Initialize ultrasonic servo
   sensorServo.attach(SERVO_PIN, 500, 2400);
   sensorServo.write(90); // Center servo
-  Serial.println("Unit 1: Servo initialized and set to 90 degrees");
-  carStop();
+  Serial.println("Ultrasonic servo initialized at 90°");
   delay(1000);
+  
+  // Test servo movement
+  Serial.println("Testing ultrasonic servo...");
+  sensorServo.write(20);  // Right
+  delay(500);
+  Serial.println("  Servo at 20° (right)");
+  sensorServo.write(160); // Left
+  delay(500);
+  Serial.println("  Servo at 160° (left)");
+  sensorServo.write(90);  // Center
+  delay(500);
+  Serial.println("  Servo returned to 90° (center)");
 
   WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
   Serial.println("\nUnit 1 WiFi connected: " + WiFi.localIP().toString());
+  Serial.println("Ready to operate!");
+  Serial.println("Starting in 3 seconds...\n");
+  delay(3000);
 }
 
 float getDistance() {
@@ -135,25 +157,46 @@ void carStop() {
 
 int scanForBestPath() {
   float leftDistance = 0, rightDistance = 0, centerDistance = 0;
-  sensorServo.write(20); // Right
+  
+  Serial.println("→ Scanning environment...");
+  
+  // Scan right
+  sensorServo.write(20);
   delay(SCAN_DELAY);
   rightDistance = getDistance();
-  sensorServo.write(160); // Left
+  
+  // Scan left
+  sensorServo.write(160);
   delay(SCAN_DELAY);
   leftDistance = getDistance();
-  sensorServo.write(90); // Center
+  
+  // Return to center
+  sensorServo.write(90);
   delay(SCAN_DELAY);
   centerDistance = getDistance();
   
-  Serial.print("Left: "); Serial.print(leftDistance);
-  Serial.print(" Center: "); Serial.print(centerDistance);
-  Serial.print(" Right: "); Serial.print(rightDistance); Serial.println(" cm");
+  Serial.print("→ Scan results - L:"); Serial.print(leftDistance);
+  Serial.print(" C:"); Serial.print(centerDistance);
+  Serial.print(" R:"); Serial.println(rightDistance);
   
-  if (centerDistance > OBSTACLE_DISTANCE) return 0;
-  if (rightDistance > leftDistance + 10 && rightDistance > SIDE_CLEAR_DISTANCE) return 1;
-  if (leftDistance > SIDE_CLEAR_DISTANCE) return -1;
-  if (rightDistance > TURN_DISTANCE) return 1;
-  return 2; // Reverse
+  if (centerDistance > OBSTACLE_DISTANCE) {
+    Serial.println("→ Center clear - forward");
+    return 0;
+  }
+  if (rightDistance > leftDistance + 10 && rightDistance > SIDE_CLEAR_DISTANCE) {
+    Serial.println("→ Right path selected");
+    return 1;
+  }
+  if (leftDistance > SIDE_CLEAR_DISTANCE) {
+    Serial.println("→ Left path selected");
+    return -1;
+  }
+  if (rightDistance > TURN_DISTANCE) {
+    Serial.println("→ Right acceptable");
+    return 1;
+  }
+  Serial.println("→ All blocked - reverse needed");
+  return 2;
 }
 
 void performTurn(int direction) {
@@ -168,6 +211,7 @@ void performTurn(int direction) {
 }
 
 void emergencyReverse() {
+  Serial.println("⚠️ EMERGENCY MANEUVER!");
   emergencyMode = true;
   carStop();
   delay(200);
@@ -180,7 +224,6 @@ void emergencyReverse() {
   stuckCounter++;
 }
 
-// Get moisture AND temperature from Unit 2
 bool getSensorDataFromUnit2(float &moisture, float &temperature) {
   for (int attempts = 0; attempts < 3; attempts++) {
     WiFiClient client;
@@ -194,7 +237,7 @@ bool getSensorDataFromUnit2(float &moisture, float &temperature) {
     client.println("Host: " + String(serverIP));
     client.println("Connection: close");
     client.println();
-    Serial.println("Attempt " + String(attempts + 1) + ": Sent GET /sensordata request to Unit 2");
+    Serial.println("Attempt " + String(attempts + 1) + ": Sent /sensordata request");
 
     unsigned long timeout = millis() + HTTP_TIMEOUT;
     String response = "";
@@ -209,14 +252,11 @@ bool getSensorDataFromUnit2(float &moisture, float &temperature) {
     }
     client.stop();
 
-    Serial.println("Raw response from Unit 2:\n" + response);
-    
     if (response.length() == 0) {
-      Serial.println("Attempt " + String(attempts + 1) + ": No response received from Unit 2");
+      Serial.println("No response from Unit 2");
       continue;
     }
     
-    // Parse response
     int moistureIndex = response.indexOf("MOISTURE:");
     int tempIndex = response.indexOf("TEMP:");
     
@@ -225,20 +265,18 @@ bool getSensorDataFromUnit2(float &moisture, float &temperature) {
       String tempLine = response.substring(tempIndex);
       moisture = moistureLine.substring(9, moistureLine.indexOf('\n')).toFloat();
       temperature = tempLine.substring(5, tempLine.indexOf('\n')).toFloat();
-      Serial.println("Moisture: " + String(moisture) + "%, Temperature: " + String(temperature) + "°C");
+      Serial.println("✓ Data received: M=" + String(moisture) + "%, T=" + String(temperature) + "°C");
       return true;
-    } else {
-      Serial.println("Attempt " + String(attempts + 1) + ": Invalid response format from Unit 2");
     }
   }
-  Serial.println("Failed to get sensor data after 3 attempts");
+  Serial.println("✗ Failed to get sensor data after 3 attempts");
   return false;
 }
 
 bool requestIrrigation() {
   WiFiClient client;
   if (!client.connect(serverIP, serverPort)) {
-    Serial.println("Failed to connect to Unit 2 for irrigation request");
+    Serial.println("✗ Failed to connect for irrigation");
     return false;
   }
 
@@ -246,7 +284,6 @@ bool requestIrrigation() {
   client.println("Host: " + String(serverIP));
   client.println("Connection: close");
   client.println();
-  Serial.println("Sent irrigation request to Unit 2");
   
   unsigned long timeout = millis() + HTTP_TIMEOUT;
   String response = "";
@@ -258,53 +295,48 @@ bool requestIrrigation() {
   }
   client.stop();
   
-  Serial.println("Irrigation request response: " + response);
   return response.indexOf("Irrigation completed") != -1;
 }
 
 void controlIrrigation() {
-  Serial.println("=== Car stopped for moisture check ===");
+  Serial.println("\n╔════════════════════════════════╗");
+  Serial.println("║  MOISTURE CHECK INITIATED     ║");
+  Serial.println("╚════════════════════════════════╝");
   
-  // Step 1: Get sensor data (moisture + temperature)
-  // Unit 2 will move servo to 110° and keep it there
   float moisture = -1;
   float temperature = -1;
   
   if (!getSensorDataFromUnit2(moisture, temperature)) {
-    Serial.println("Failed to read sensor data from Unit 2");
-    Serial.println("Waiting " + String(DATA_COLLECTION_WAIT) + "ms before continuing");
+    Serial.println("⚠️ Sensor read failed - waiting " + String(DATA_COLLECTION_WAIT) + "ms");
     delay(DATA_COLLECTION_WAIT);
+    Serial.println("╚════════════════════════════════╝\n");
     return;
   }
   
-  // Step 2: Check if irrigation is needed
   if (moisture < MOISTURE_THRESHOLD && temperature > TEMP_THRESHOLD) {
-    Serial.println("Conditions met for irrigation:");
-    Serial.println("  Moisture: " + String(moisture) + "% < " + String(MOISTURE_THRESHOLD) + "%");
-    Serial.println("  Temperature: " + String(temperature) + "°C > " + String(TEMP_THRESHOLD) + "°C");
-    Serial.println("Requesting irrigation from Unit 2...");
+    Serial.println("✓ Irrigation conditions met:");
+    Serial.println("  • Moisture: " + String(moisture) + "% < " + String(MOISTURE_THRESHOLD) + "%");
+    Serial.println("  • Temperature: " + String(temperature) + "°C > " + String(TEMP_THRESHOLD) + "°C");
+    Serial.println("Requesting irrigation...");
     
     if (requestIrrigation()) {
-      Serial.println("✓ Irrigation completed successfully");
-      Serial.println("Waiting " + String(IRRIGATION_WAIT) + "ms for irrigation process");
-      delay(IRRIGATION_WAIT); // Wait for pump (5s) + servo return (3s)
+      Serial.println("✓ Irrigation completed");
+      Serial.println("Waiting " + String(IRRIGATION_WAIT) + "ms");
+      delay(IRRIGATION_WAIT);
     } else {
-      Serial.println("✗ Irrigation request failed");
-      Serial.println("Waiting " + String(DATA_COLLECTION_WAIT) + "ms before continuing");
+      Serial.println("✗ Irrigation failed");
       delay(DATA_COLLECTION_WAIT);
     }
   } else {
-    Serial.println("Irrigation not needed:");
-    Serial.println("  Moisture: " + String(moisture) + "% (threshold: " + String(MOISTURE_THRESHOLD) + "%)");
-    Serial.println("  Temperature: " + String(temperature) + "°C (threshold: " + String(TEMP_THRESHOLD) + "°C)");
-    Serial.println("Waiting " + String(DATA_COLLECTION_WAIT) + "ms for data collection");
+    Serial.println("✗ Irrigation not needed:");
+    Serial.println("  • Moisture: " + String(moisture) + "% (need: < " + String(MOISTURE_THRESHOLD) + "%)");
+    Serial.println("  • Temperature: " + String(temperature) + "°C (need: > " + String(TEMP_THRESHOLD) + "°C)");
+    Serial.println("Waiting " + String(DATA_COLLECTION_WAIT) + "ms");
     delay(DATA_COLLECTION_WAIT);
-    
-    // Request servo return since no irrigation happened
-    requestIrrigation(); // This will return servo without activating pump
+    requestIrrigation(); // Return servo
   }
   
-  Serial.println("=== Resuming movement ===\n");
+  Serial.println("╚════════════════════════════════╝\n");
 }
 
 void loop() {
@@ -315,20 +347,25 @@ void loop() {
   // Periodic moisture check
   if (currentMillis - lastMoistureCheck >= MOISTURE_CHECK_INTERVAL) {
     carStop();
+    delay(200); // Ensure car fully stopped
     controlIrrigation();
     lastMoistureCheck = currentMillis;
   }
 
-  // Obstacle avoidance
+  // Obstacle avoidance with ultrasonic servo
   distance = getDistance();
+  
   if (distance > OBSTACLE_DISTANCE) {
     carForward();
     stuckCounter = max(0, stuckCounter - 1);
-    if (emergencyMode && distance > OBSTACLE_DISTANCE + 20) emergencyMode = false;
+    if (emergencyMode && distance > OBSTACLE_DISTANCE + 20) {
+      emergencyMode = false;
+      Serial.println("Emergency mode cleared");
+    }
   } else if (distance > EMERGENCY_DISTANCE) {
     carStop();
     delay(200);
-    int path = scanForBestPath();
+    int path = scanForBestPath(); // This uses servo scanning
     switch (path) {
       case 0: carForward(); break;
       case 1: performTurn(1); break;

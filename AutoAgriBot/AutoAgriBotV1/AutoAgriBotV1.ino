@@ -21,7 +21,7 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 1000;
 
 // Sensor definitions
-#define DHTPIN 4          // DHT11 data pin (GPIO4 / D2 on NodeMCU)
+#define DHTPIN D7          // DHT11 data pin (GPIO4 / D2 on NodeMCU)
 #define DHTTYPE DHT11     // DHT11 sensor type
 DHT dht(DHTPIN, DHTTYPE);
 
